@@ -44,6 +44,7 @@ public class BoxAdapter extends BaseAdapter {
 
         Task task = getItem(position);
 
+        ((TextView) view.findViewById(R.id.number_of_task)).setText(task.number_of_task);
         ((TextView) view.findViewById(R.id.task)).setText(task.text);
 
         return view;

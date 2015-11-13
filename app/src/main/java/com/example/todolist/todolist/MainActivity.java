@@ -46,8 +46,9 @@ public class MainActivity extends AppCompatActivity {
                             Log.e("status", response.getBoolean("status") + "");
                             if (response.getBoolean("status")) {
                                 JSONArray data = response.getJSONArray("data");
-                                for (int i = 0; i < data.length(); i++) {
+                                for (int i = 0, j = 1; i < data.length(); i++, j++) {
                                     tasks.add(new Task(
+                                            j + ". ",
                                             data.getJSONObject(i).getInt("id"),
                                             data.getJSONObject(i).getString("text"),
                                             isNull(data.getJSONObject(i).getString("parent"))
