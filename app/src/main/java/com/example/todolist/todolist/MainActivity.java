@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.EditText;
 import android.widget.ListView;
 
 import com.loopj.android.http.*;
@@ -26,22 +27,25 @@ import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
-    public final static String URL = "http://192.168.56.1/backend/index.php?action=get_tasks";
+    public final static String URL = "http://192.168.56.1/backend/index.php";
+    public EditText task_text;
+
+    AsyncHttpClient client;
+    List<Task> tasks;
+    BoxAdapter boxAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.get(URL, new JsonHttpResponseHandler() {
+        task_text = (EditText)findViewById(R.id.task_text);
+        tasks = new ArrayList<Task>();
+        client = new AsyncHttpClient();
+
+        client.get(GenerateURL("get_tasks", 0, ""), new JsonHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-
-                        List<Task> tasks = new ArrayList<Task>();
-
                         try {
                             Log.e("status", response.getBoolean("status") + "");
                             if (response.getBoolean("status")) {
@@ -61,7 +65,7 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                             Log.e("error", Log.getStackTraceString(e));
                         }
-                        BoxAdapter boxAdapter = new BoxAdapter(MainActivity.this, tasks);
+                        boxAdapter = new BoxAdapter(MainActivity.this, tasks);
                         ListView lvMain = (ListView) findViewById(R.id.lvMain);
                         lvMain.setAdapter(boxAdapter);
                     }
@@ -72,6 +76,55 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+    public void NewTask(View v){
+
+        client.get(GenerateURL("new_task", 0, task_text.getText().toString()), new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    if (response.getBoolean("status")) {
+                        tasks.add(new Task(
+                                tasks.size() + 1 + ".",
+                                response.getInt("data"),
+                                task_text.getText().toString(),
+                                0
+                        ));
+                        boxAdapter.notifyDataSetChanged();
+                        task_text.setText("");
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONArray errorResponse) {
+
+            }
+        });
+    }
+
+    public String GenerateURL(String action, int id, String text){
+        String generated_url = URL + "?action=";
+        switch (action){
+            case "get_tasks":
+                generated_url += "get_tasks";
+                break;
+            case "new_task":
+                generated_url += "write&text=" + text;
+                break;
+            case "edit_task":
+                generated_url += "rewrite&id=" + id + "&text=" + text;
+                break;
+            case "delete":
+                generated_url += "delete&id=" + id;
+                break;
+        }
+
+        return generated_url;
     }
 
     public int isNull(String str){
