@@ -2,4 +2,8 @@
     <string name="app_name">todolist</string>
     <string name="action_settings">Settings</string>
     <string name="new_task">New Task</string>
+    <string name="title_activity_more_information">MoreInformationActivity</string>
+    <string name="edit_task">Edit Task</string>
+    <string name="delete_task">Delete Task</string>
+    <string name="success">Success</string>
 </resources>

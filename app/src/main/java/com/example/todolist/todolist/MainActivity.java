@@ -1,5 +1,7 @@
 package com.example.todolist.todolist;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -10,8 +12,10 @@ import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.loopj.android.http.*;
 
@@ -33,6 +37,9 @@ public class MainActivity extends AppCompatActivity {
     AsyncHttpClient client;
     List<Task> tasks;
     BoxAdapter boxAdapter;
+    ListView lvMain;
+    Intent intent;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +49,10 @@ public class MainActivity extends AppCompatActivity {
         task_text = (EditText)findViewById(R.id.task_text);
         tasks = new ArrayList<Task>();
         client = new AsyncHttpClient();
+        lvMain = (ListView) findViewById(R.id.lvMain);
+        intent = new Intent(MainActivity.this, MoreInformationActivity.class);
 
-        client.get(GenerateURL("get_tasks", 0, ""), new JsonHttpResponseHandler() {
+        client.get(GenerateURL("get_tasks", ""), new JsonHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
@@ -66,7 +75,6 @@ public class MainActivity extends AppCompatActivity {
                             Log.e("error", Log.getStackTraceString(e));
                         }
                         boxAdapter = new BoxAdapter(MainActivity.this, tasks);
-                        ListView lvMain = (ListView) findViewById(R.id.lvMain);
                         lvMain.setAdapter(boxAdapter);
                     }
 
@@ -76,11 +84,21 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+        lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                intent.putExtra("id", tasks.get(position).id + "");
+                intent.putExtra("task", tasks.get(position).text);
+                intent.putExtra("edit", GenerateURL("edit_task", ""));
+                intent.putExtra("delete", GenerateURL("delete_task", ""));
+                startActivity(intent);
+            }
+        });
     }
 
     public void NewTask(View v){
 
-        client.get(GenerateURL("new_task", 0, task_text.getText().toString()), new JsonHttpResponseHandler() {
+        client.get(GenerateURL("new_task", task_text.getText().toString()), new JsonHttpResponseHandler() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -107,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public String GenerateURL(String action, int id, String text){
+    public String GenerateURL(String action, String text){
         String generated_url = URL + "?action=";
         switch (action){
             case "get_tasks":
@@ -117,10 +135,10 @@ public class MainActivity extends AppCompatActivity {
                 generated_url += "write&text=" + text;
                 break;
             case "edit_task":
-                generated_url += "rewrite&id=" + id + "&text=" + text;
+                generated_url += "rewrite";
                 break;
-            case "delete":
-                generated_url += "delete&id=" + id;
+            case "delete_task":
+                generated_url += "delete";
                 break;
         }
 
