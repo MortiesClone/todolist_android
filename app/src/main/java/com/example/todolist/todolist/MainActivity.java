@@ -31,7 +31,7 @@ import cz.msebera.android.httpclient.Header;
 
 public class MainActivity extends AppCompatActivity {
 
-    public final static String URL = "http://192.168.56.1/backend/index.php";
+    public final static String URL = "http://192.168.56.1/backend/";
     public EditText task_text;
 
     AsyncHttpClient client;
@@ -40,6 +40,14 @@ public class MainActivity extends AppCompatActivity {
     ListView lvMain;
     Intent intent;
 
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(data == null)
+            return;
+        Get_Tasks();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +60,28 @@ public class MainActivity extends AppCompatActivity {
         lvMain = (ListView) findViewById(R.id.lvMain);
         intent = new Intent(MainActivity.this, MoreInformationActivity.class);
 
+        Get_Tasks();
+
+        lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                intent.putExtra("id", tasks.get(position).id + "");
+                intent.putExtra("task", tasks.get(position).text);
+                intent.putExtra("edit", GenerateURL("edit_task", ""));
+                intent.putExtra("delete", GenerateURL("delete_task", ""));
+                startActivityForResult(intent, 1);
+            }
+        });
+    }
+
+    public void Get_Tasks(){
         client.get(GenerateURL("get_tasks", ""), new JsonHttpResponseHandler() {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                         try {
-                            Log.e("status", response.getBoolean("status") + "");
                             if (response.getBoolean("status")) {
                                 JSONArray data = response.getJSONArray("data");
+                                tasks = new ArrayList<Task>();
                                 for (int i = 0, j = 1; i < data.length(); i++, j++) {
                                     tasks.add(new Task(
                                             j + ". ",
@@ -84,16 +107,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
-        lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                intent.putExtra("id", tasks.get(position).id + "");
-                intent.putExtra("task", tasks.get(position).text);
-                intent.putExtra("edit", GenerateURL("edit_task", ""));
-                intent.putExtra("delete", GenerateURL("delete_task", ""));
-                startActivity(intent);
-            }
-        });
+
     }
 
     public void NewTask(View v){
