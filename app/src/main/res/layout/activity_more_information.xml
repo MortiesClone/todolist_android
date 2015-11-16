@@ -56,6 +56,20 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:text="@string/delete_task"/>
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/back"
+            android:id="@+id/back"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:onClick="BackToBegin"
+            android:textColor="@color/white"
+            android:background="@color/colorPrimaryDark"
+            android:layout_alignBottom="@+id/imageView" />
     </RelativeLayout>
 
 </android.support.design.widget.CoordinatorLayout>

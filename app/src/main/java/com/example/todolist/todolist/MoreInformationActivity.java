@@ -50,13 +50,19 @@ public class MoreInformationActivity extends AppCompatActivity {
         Send(url);
     }
 
+    public void BackToBegin(View v){
+        finish();
+    }
+
     public void Send(String url){
         client.get(url, new JsonHttpResponseHandler(){
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
-                    if(response.getBoolean("status"))
+                    if(response.getBoolean("status")) {
                         Toast.makeText(MoreInformationActivity.this, R.string.success, Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
